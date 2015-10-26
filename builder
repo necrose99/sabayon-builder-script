@@ -5,6 +5,7 @@ use Getopt::Long;
 
 my $profile = $ENV{BUILDER_PROFILE} // 3;
 my $jobs    = $ENV{BUILDER_JOBS}    // 1;
+my $preserved_rebuild    = $ENV{PRESERVED_REBUILD}    // 0;
 my @overlays;
 
 GetOptions('layman|overlay:s{,}' => \@overlays);
@@ -40,7 +41,7 @@ sub atom { s/-[0-9]{1,}.*$//; }
 sub say { print join( "\n", @_ ) . "\n"; }
 
 sub help {
-	say "You should feed me with something", "$0 app-text/tree" , "$0 plasma-meta --layman kde", "You can supply multiple overlays as well: $0 plasma-meta --layman kde plab";
+	say "-> You should feed me with something","","Examples:","", "\t$0 app-text/tree" , "\t$0 plasma-meta --layman kde","","**************************","", "You can supply multiple overlays as well: $0 plasma-meta --layman kde plab","";
 }
 
 say "************* IF YOU WANT TO SUPPLY ADDITIONAL ARGS TO EMERGE, pass to docker EMERGE_DEFAULT_OPTS env with your options *************";
@@ -129,5 +130,11 @@ system("equo i $_") for @packages_deps;
 say "* Ready to compile, finger crossed";
 
 my $rt = system("emerge -j $jobs --buildpkg @packages");
+
+if($preserved_rebuild){
+
+	system("emerge -j $jobs --buildpkg \@preserved-rebuild");
+
+}
 
 exit($rt >> 8);
